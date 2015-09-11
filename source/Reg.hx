@@ -34,4 +34,15 @@ class Reg
 	 * Especially useful for setting up multiple save slots.
 	 */
 	public static var saves:Array<FlxSave> = [];
+	
+	public static var sword:SwordSprite;
+	
+	public static var fame:Int = 0;
+	
+	public static var heroX:Int = 100;
+	
+	public static var heroBoundary:Int = heroX + 50 + 25; // X + sprite width + offset
+	
+	public static var colOffset:Int = 50 + 0; // sprite width + offset
+	
 }
