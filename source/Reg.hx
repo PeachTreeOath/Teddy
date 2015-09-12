@@ -45,4 +45,5 @@ class Reg
 	
 	public static var colOffset:Int = 50 + 0; // sprite width + offset
 	
+	public static var speed:Float = 0;
 }

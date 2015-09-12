@@ -12,6 +12,7 @@ import flixel.util.FlxTimer;
 class SwordSprite extends FlxSpriteGroup
 {	
 	private var level:Int = 1;
+	private var damage:Int = 1;
 	private var tip:FlxSprite;
 	private var slice:FlxSprite;
 	private var runeLevel:Int = 1;
@@ -32,7 +33,7 @@ class SwordSprite extends FlxSpriteGroup
 		tip = new FlxSprite(x, y - 50, "assets/images/swordtip.png");
 		add(tip);
 		
-		slice = new FlxSprite(x + 70, y - 100, "assets/images/slice3.png");
+		slice = new FlxSprite(x + 70, y - 100, "assets/images/slice.png");
 		add(slice);
 		slice.visible = false;
 		
@@ -45,7 +46,12 @@ class SwordSprite extends FlxSpriteGroup
 	{
 		return level;
 	}
-	
+		
+	public function getDamage():Int
+	{
+		return damage;
+	}
+
 	public function upgradeSize():Void
 	{
 		level++;
@@ -96,5 +102,5 @@ class SwordSprite extends FlxSpriteGroup
 			slice.visible = false;
 		}
 	}
-	
+
 }
