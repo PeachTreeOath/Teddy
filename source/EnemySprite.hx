@@ -5,6 +5,9 @@ import flixel.group.*;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.effects.FlxFlicker;
+import flixel.util.FlxRandom;
+
 /**
  * ...
  * @author 
@@ -17,6 +20,7 @@ class EnemySprite extends FlxSpriteGroup
 	private var col:Int;
 	private var hp:Int;
 	private var hpText:FlxText;
+	private var type:Int;
 	
 	public function new(X:Float=0, Y:Float=0, level:Int) 
 	{
@@ -34,12 +38,13 @@ class EnemySprite extends FlxSpriteGroup
 				add(new FlxSprite(0, 0, "assets/images/lizardp.png"));
 				hp = 10;
 		}
+		type = level;
 		
 		hpText = new FlxText(30, -10, 50, cast(hp), 12, true);
 		hpText.color = FlxColor.BLACK;
 		add(hpText);
 		
-		velocity.x = -Reg.speed * 15;
+		velocity.x = -Reg.speed * 12;
 	}
 	
 	override public function update():Void
@@ -58,7 +63,7 @@ class EnemySprite extends FlxSpriteGroup
 		}
 		else
 		{
-			velocity.x = -Reg.speed * 15;
+			velocity.x = -Reg.speed * 12;
 		}
 	}
 
@@ -88,6 +93,7 @@ class EnemySprite extends FlxSpriteGroup
 	{
 		hp -= damage;
 		hpText.text = cast(hp);
+		FlxFlicker.flicker(this, 0.5, 0.04, true, true);
 	}
 	
 	public function getHp():Int
@@ -104,5 +110,42 @@ class EnemySprite extends FlxSpriteGroup
 	public function applyTempCol():Void
 	{
 		setCol(tempCol);
+	}
+	
+	public function getGold():Int
+	{
+		switch(type)
+		{
+			case 1:
+				return 1;
+			case 2:
+				return 4;
+			case 3:
+				return 10;
+		}
+		
+		return -1;
+	}
+	
+	public function getRune():Int
+	{
+		if (FlxRandom.chanceRoll(90))
+		{
+			var runeType:Int = FlxRandom.intRanged(1, 3);
+			
+			if (Reg.runeInventory.get(runeType) == null)
+			{
+				Reg.runeInventory.set(runeType, 1);
+			}
+			else
+			{
+				var runeCount:Int = Reg.runeInventory.get(runeType);
+				Reg.runeInventory.set(runeType, runeCount++);
+			}
+			
+			return runeType;
+		}
+		
+		return -1;
 	}
 }

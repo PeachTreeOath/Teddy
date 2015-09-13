@@ -37,7 +37,7 @@ class Reg
 	
 	public static var sword:SwordSprite;
 	
-	public static var fame:Int = 0;
+	public static var gold:Int = 1000;
 	
 	public static var heroX:Int = 100;
 	
@@ -46,4 +46,8 @@ class Reg
 	public static var colOffset:Int = 50 + 0; // sprite width + offset
 	
 	public static var speed:Float = 0;
+	
+	public static var runeInventory:Map<Int, Int> = new Map<Int, Int>();
+	
+	public static var furthestRun:Float = 0;
 }

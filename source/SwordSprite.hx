@@ -4,6 +4,7 @@ import flixel.*;
 import flixel.group.*;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.effects.FlxFlicker;
 
 /**
  * ...
@@ -11,17 +12,21 @@ import flixel.util.FlxTimer;
  */
 class SwordSprite extends FlxSpriteGroup
 {	
-	private var level:Int = 1;
-	private var damage:Int = 1;
+	private var size:Int = 1;
+	private var sharpness:Int = 1;
+	private var balance:Int = 1;
 	private var tip:FlxSprite;
 	private var slice:FlxSprite;
 	private var runeLevel:Int = 1;
+	private var map:Map<Int, Map<Int, Int>>;
 	private var swordParts:Array<FlxSprite>;
 	
 	public function new(X:Float=0, Y:Float=0) 
 	{
 		super(X, Y, 0);
 		
+		map = new Map<Int, Map<Int,Int>>();
+		map.set(1, new Map<Int,Int>());
 		swordParts = new Array<FlxSprite>();
 		
 		var hilt:FlxSprite = new FlxSprite(x, y, "assets/images/swordhilt.png");
@@ -33,7 +38,7 @@ class SwordSprite extends FlxSpriteGroup
 		tip = new FlxSprite(x, y - 50, "assets/images/swordtip.png");
 		add(tip);
 		
-		slice = new FlxSprite(x + 70, y - 100, "assets/images/slice.png");
+		slice = new FlxSprite(x + 100, y - 100, "assets/images/slice.png");
 		add(slice);
 		slice.visible = false;
 		
@@ -42,28 +47,46 @@ class SwordSprite extends FlxSpriteGroup
 		swordParts.push(tip);
 	}
 
-	public function getLevel():Int
+	public function getSize():Int
 	{
-		return level;
+		return size;
 	}
 		
-	public function getDamage():Int
+	public function getSharpness():Int
 	{
-		return damage;
+		return sharpness;
 	}
-
-	public function upgradeSize():Void
+		
+	public function getBalance():Int
 	{
-		level++;
-		var blade:FlxSprite = new FlxSprite(0, -25*level, "assets/images/swordblade.png");
+		return balance;
+	}
+	
+	public function levelUpSize():Void
+	{
+		size++;
+		var blade:FlxSprite = new FlxSprite(0, -25*size, "assets/images/swordblade.png");
 		add(blade);
 		swordParts.push(blade);
 		tip.y -= 25;
+		slice.x += 33;
+		slice.scale.x++;
+		map.set(size, new Map<Int,Int>());
+	}
+	
+	public function levelUpSharpness():Void
+	{
+		sharpness++;
+	}
+	
+	public function levelUpBalance():Void
+	{
+		balance++;
 	}
 	
 	public function equipRune(runeType:Int):Void
 	{
-		if (runeLevel > level)
+		if (runeLevel > size)
 		{
 			return;
 		}
@@ -72,17 +95,25 @@ class SwordSprite extends FlxSpriteGroup
 		
 		switch(runeType)
 		{
-			case 1: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runeruby.png");
+			case 1: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runefire.png");
 					
-			case 2: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runelightning.png");
+			case 2: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runedark.png");
 					
-			case 3: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runedark.png");
+			case 3: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runelightning.png");
 					
 		}
 		add(rune);
 		runeLevel++;	
 	}
 	
+	// 1: Fire
+	// 2: Dark
+	// 3: Lightning
+	//public function equipRune(row:Int, col:Int, runeType:Int):Void
+	//{
+		//
+	//}
+	//
 	public function setAttack(attack:Bool):Void
 	{
 		if (attack)
@@ -103,4 +134,27 @@ class SwordSprite extends FlxSpriteGroup
 		}
 	}
 
+	public function forceReadySword():Void
+	{
+		for (part in swordParts)
+		{
+			part.visible = true;
+		}
+		slice.visible = false;
+	}
+	
+	public function flicker():Void
+	{
+		for (part in swordParts)
+		{
+			FlxFlicker.flicker(part, 1, 0.04, true, false, function(flick:FlxFlicker) { this.visible = false; } );
+		}
+	}
+	
+	override public function destroy()
+	{
+		forceReadySword();
+		
+		Reg.sword = this;
+	}
 }
