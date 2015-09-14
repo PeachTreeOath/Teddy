@@ -12,12 +12,14 @@ import flixel.util.FlxMath;
 import flixel.util.FlxColor;
 import flixel.util.FlxRandom;
 import flixel.util.FlxRect;
+import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
 import flixel.util.FlxColor;
 import flixel.util.FlxPoint;
 import flixel.effects.FlxFlicker;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxSpriteUtil;
+import flixel.addons.api.FlxKongregate;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -53,6 +55,11 @@ class PlayState extends FlxState
 	private var darkSprite:FlxSprite;
 	private var runeSprite:FlxSprite;
 	
+	private function loadCallback():Void
+	{
+		FlxKongregate.connect();
+	}
+	
 	/**
 	 * Function that is called up when to state is created to set it up. 
 	 */
@@ -60,18 +67,12 @@ class PlayState extends FlxState
 	{
 		FlxG.camera.fade(FlxColor.BLACK, 1, true);
 		super.create();
+
+		FlxKongregate.init(loadCallback);
 		
-		//TODO: cleanup spells
-		spell1 = new FlxButton(300, 50, "FLAME SPEAR", castFire);
-		add(spell1);
-		spell2 = new FlxButton(300, 80, "GRAVITY WELL", castDark);
-		add(spell2);
-		spell3 = new FlxButton(300, 110, "INDIGNATION", castLightning);
-		add(spell3);
 		fireSprite = new FlxSprite(0, 0, "assets/images/spellfire.png");
 		lightningSprite = new FlxSprite(0, 0, "assets/images/spelllightning.png");
 		darkSprite = new FlxSprite(0, 0, "assets/images/spelldark.png");
-		//TODO
 		
 		FlxG.cameras.bgColor = 0xFF66FFFF;
 		backdropMtns = new FlxBackdrop("assets/images/mountains.png", 100, 0, true, false);
@@ -95,6 +96,7 @@ class PlayState extends FlxState
 		loadSword();
 		add(sword);
 		hero.equipSword(sword);
+		calculateSpells();
 		
 		goldText = new FlxText(30, 20, 200, "GOLD: " + Std.int(Reg.gold), 12, true);
 		goldText.color = FlxColor.GOLDENROD;
@@ -149,8 +151,61 @@ class PlayState extends FlxState
 		}
 		sword.x = hero.x - 30;
 		sword.y = hero.y - 5;
+		
+		var runes:Map<Int,Int> = Reg.sword.getRunes();
+		for (i in 0...Reg.sword.getSize())
+		{
+			var index:Int = i + 1;
+			var rune:Int = runes.get(index);
+			if (rune != 0)
+			{
+				sword.equipRune(index, rune);
+			}
+		}
 	}
 
+	var rune1Count:Int = 0;
+	var rune2Count:Int = 0;
+	var rune3Count:Int = 0;
+	private function calculateSpells():Void
+	{
+		var runes:Map<Int,Int> = sword.getRunes();	
+		var buttonScaleX:Float = 1;
+		var buttonScaleY:Float = 2.5;
+		
+		for (rune in runes)
+		{
+			switch(rune)
+			{
+				case 1: rune1Count += 3;
+				case 2: rune2Count += 3;
+				case 3: rune3Count += 3;
+			}
+		}
+		if (rune1Count > 0)
+		{
+			spell1 = new FlxButton(30, 170, "FLAME SPEAR\nx" + cast(rune1Count), castFire);
+			spell1.scale.x = buttonScaleX;
+			spell1.scale.y = buttonScaleY;
+			add(spell1);
+		}
+		if (rune2Count > 0)
+		{
+			spell2 = new FlxButton(30, 225, "GRAVITY WELL\nx" + cast(rune2Count), castDark);
+			spell2.scale.x = buttonScaleX;
+			spell2.scale.y = buttonScaleY;
+			add(spell2);
+		}
+		if (rune3Count > 0)
+		{
+			spell3 = new FlxButton(30, 280, "INDIGNATION\nx" + cast(rune3Count), castLightning);
+			spell3.scale.x = buttonScaleX;
+			spell3.scale.y = buttonScaleY;
+			add(spell3);
+		}
+
+	}
+	
 	/**
 	 * Function that is called once every frame.
 	 */
@@ -220,10 +275,11 @@ class PlayState extends FlxState
 		}
 		
 		distance += Reg.speed / 1000;
-		Reg.speed -= .2;
+		Reg.speed -= 0.1 + 0.005 * totalTime;
 		backdropMtns.velocity.x = -Reg.speed * 5;
 		backdropHills.velocity.x = -Reg.speed * 10;
 		speedText.text = "SPEED: " + Std.int(Reg.speed);
+
 		distanceText.text = "DISTANCE: " + Std.int(distance);
 	}	
 	
@@ -266,6 +322,11 @@ class PlayState extends FlxState
 	
 	private function castFire():Void
 	{
+		if (rune1Count <= 0 || dead)
+		{
+			return;
+		}
+		
 		var highestRow:Int = -1;
 		var highestCount:Int = 0;
 		var i:Int = 0;
@@ -284,11 +345,15 @@ class PlayState extends FlxState
 			var delay:Float = 0;
 			for (enemy in enemyLanes.get(highestRow))
 			{
-				enemy.takeDamage(3);
+				enemy.takeDamage(10);
 			}
 			fireSprite.y = topRowHeight + rowOffset * highestRow;
 			playFireAnim(null);
 		}
+		
+		rune1Count--;
+		spell1.text = "FLAME SPEAR x" + cast(rune1Count);
+		
 		FlxG.camera.shake(0.01, 0.2);
 	}
 	
@@ -313,9 +378,14 @@ class PlayState extends FlxState
 	private var lightningAnimCount:Int = 0;
 	private function castLightning():Void
 	{
+		if (rune3Count <= 0 || dead)
+		{
+			return;
+		}
+		
 		lightningAnimPoints = new Array<FlxPoint>();
 		var i:Int = 0;
-		for (i in 0...15)
+		for (i in 0...20)
 		{
 			var row:Int = FlxRandom.intRanged(0, 4);
 			var col:Int = FlxRandom.intRanged(0, 12);
@@ -325,17 +395,20 @@ class PlayState extends FlxState
 			var enemy:EnemySprite = getEnemyAt(row, col);
 			if (enemy != null)
 			{
-				enemy.takeDamage(3);
+				enemy.takeDamage(10);
 			}
 		}
-
+		
+		rune3Count--;
+		spell3.text =  "INDIGNATION x" + cast(rune3Count);
+		
 		playLightningAnim(null);
 		FlxG.camera.shake(0.01, 0.2);
 	}
 	
 	private function playLightningAnim(timer:FlxTimer):Void
 	{
-		if (lightningAnimCount >= 15)
+		if (lightningAnimCount >= 20)
 		{
 			lightningAnimCount = 0;
 			remove(lightningSprite);
@@ -353,6 +426,10 @@ class PlayState extends FlxState
 	
 	private function castDark():Void
 	{
+		if (rune2Count <= 0 || dead)
+		{
+			return;
+		}
 		var row:Int;
 		var col:Int;
 		
@@ -363,10 +440,16 @@ class PlayState extends FlxState
 				var enemy:EnemySprite = getEnemyAt(row, col);
 				if (enemy != null)
 				{
-					enemy.takeDamage(3);
+					if (enemy.x < Reg.heroBoundary + Reg.colOffset * 5)
+					{
+						enemy.takeDamage(5);	
+					}
 				}
 			}
 		}
+		
+		rune2Count--;
+		spell2.text = "GRAVITY WELL x" + cast(rune2Count);
 		
 		playDarkAnim(null);
 		FlxG.camera.shake(0.01, 0.5);
@@ -417,13 +500,18 @@ class PlayState extends FlxState
 		add(enemy);
 		
 		// Generate new monster
-		new FlxTimer(FlxRandom.floatRanged(0, 1), createEnemy, 1);
+		var max:Float = 1 - Reg.speed / 1000;
+		if (max < 0.1)
+		{
+			max = 0.1;
+		}
+		new FlxTimer(FlxRandom.floatRanged(0, max), createEnemy, 1);
 	}
 
 	private function getLoot(enemy:EnemySprite):Void
 	{
 		var goldGain:Int = enemy.getGold();
-		var speedGain:Int = 3 + sword.getBalance() * 2;
+		var speedGain:Int = 2 + sword.getBalance() * 1;
 		Reg.gold += goldGain;
 		Reg.speed += speedGain;
 		goldRewardText.text = "+" + goldGain;
@@ -448,21 +536,36 @@ class PlayState extends FlxState
 			{
 				case 1:
 					runeSprite = new FlxSprite(115, 542, "assets/images/runefire.png");
+					Reg.runeInventory.set(1, Reg.runeInventory.get(1) + 1);
 				case 2:
 					runeSprite = new FlxSprite(115, 542, "assets/images/runedark.png");
+					Reg.runeInventory.set(2, Reg.runeInventory.get(2) + 1);
 				case 3:
 					runeSprite = new FlxSprite(115, 542, "assets/images/runelightning.png");
+					Reg.runeInventory.set(3, Reg.runeInventory.get(3) + 1);
 			}
 			add(runeSprite);
 			runeRewardText.alpha = 1;
 			runeSprite.alpha = 1;
-			FlxSpriteUtil.fadeOut(runeRewardText, 1, false);
-			FlxSpriteUtil.fadeOut(runeSprite, 1, false);
+			FlxSpriteUtil.fadeOut(runeRewardText, 3, false);
+			FlxSpriteUtil.fadeOut(runeSprite, 3, false);
 		}
 	}
 	
 	private function gotoShopState():Void
 	{
+		FlxKongregate.submitStats("Furthest Run", Std.int(Reg.furthestRun));
+		
+		//var gameSave:FlxSave = new FlxSave();
+		//gameSave.bind("bsbSave");
+		//gameSave.data.sword = sword;
+		//gameSave.data.gold = Reg.gold;
+		//gameSave.data.fireCount = Reg.runeInventory.get(1);
+		//gameSave.data.darkCount = Reg.runeInventory.get(2);
+		//gameSave.data.lightningCount = Reg.runeInventory.get(3);
+		//gameSave.data.furthestRun = Std.int(Reg.furthestRun);
+		//gameSave.flush(0);
+		
 		FlxG.camera.fade(FlxColor.BLACK,1, false,function() {
 		FlxG.switchState(new ShopState());
 		});

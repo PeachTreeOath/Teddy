@@ -129,7 +129,7 @@ class EnemySprite extends FlxSpriteGroup
 	
 	public function getRune():Int
 	{
-		if (FlxRandom.chanceRoll(90))
+		if (FlxRandom.chanceRoll(3))
 		{
 			var runeType:Int = FlxRandom.intRanged(1, 3);
 			

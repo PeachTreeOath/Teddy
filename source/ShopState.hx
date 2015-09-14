@@ -9,6 +9,7 @@ import flixel.util.FlxMath;
 import flixel.plugin.MouseEventManager;
 import flixel.FlxBasic;
 import flixel.util.FlxColor;
+import flixel.util.FlxSave;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -21,7 +22,7 @@ class ShopState extends FlxState
 	private var goldText:FlxText;
 	private var upgradeCosts:Array<Int>;
 	private var widgets:Array<FlxBasic>;
-	
+	private var slotWidgets:Array<FlxBasic>;
 	/**
 	 * Function that is called up when to state is created to set it up. 
 	 */
@@ -33,6 +34,7 @@ class ShopState extends FlxState
 		setupCosts();
 		
 		widgets = new Array<FlxBasic>();
+		slotWidgets = new Array<FlxBasic>();
 		
 		bg = new FlxSprite(0, 0, "assets/images/shop.png");
 		add(bg);
@@ -44,7 +46,7 @@ class ShopState extends FlxState
 		
 		loadSword();
 		add(sword);
-		
+
 		var smithTab:FlxButton = new FlxButton(25, 107, "SMITH", showSmith);
 		smithTab.scale.x = 1.3;
 		smithTab.scale.y = 2;
@@ -55,31 +57,31 @@ class ShopState extends FlxState
 		runesTab.scale.y = 2;
 		add(runesTab);
 		
-		var shrineTab:FlxButton = new FlxButton(25 + tabOffset * 2, 107, "SHRINE", null);
+		var shrineTab:FlxButton = new FlxButton(25 + tabOffset * 2, 107, "SHRINE N/A", null);
 		shrineTab.scale.x = 1.3;
 		shrineTab.scale.y = 2;
 		add(shrineTab);
 		
-		var petsTab:FlxButton = new FlxButton(25 + tabOffset * 3, 107, "PETS", null);
+		var petsTab:FlxButton = new FlxButton(25 + tabOffset * 3, 107, "PETS N/A", null);
 		petsTab.scale.x = 1.3;
 		petsTab.scale.y = 2;
 		add(petsTab);
 		
-		var ornamentsTab:FlxButton = new FlxButton(25 + tabOffset * 4, 107, "ORNAMENTS", null);
+		var ornamentsTab:FlxButton = new FlxButton(25 + tabOffset * 4, 107, "ORNAMENTS N/A", null);
 		ornamentsTab.scale.x = 1.3;
 		ornamentsTab.scale.y = 2;
 		add(ornamentsTab);	
 		
-		var soulsTab:FlxButton = new FlxButton(25 + tabOffset * 5, 107, "SOULS", null);
+		var soulsTab:FlxButton = new FlxButton(25 + tabOffset * 5, 107, "SOULS N/A", null);
 		soulsTab.scale.x = 1.3;
 		soulsTab.scale.y = 2;
 		add(soulsTab);		
 		
-		var gridsphereTab:FlxButton = new FlxButton(25 + tabOffset * 6, 107, "GRID SPHERE", null);
+		var gridsphereTab:FlxButton = new FlxButton(25 + tabOffset * 6, 107, "GRID SPHERE N/A", null);
 		gridsphereTab.scale.x = 1.3;
 		gridsphereTab.scale.y = 2;
 		add(gridsphereTab);	
-				
+
 		goldText = new FlxText(30, 20, 200, "GOLD: " + Std.int(Reg.gold), 12, true);
 		goldText.color = FlxColor.GOLDENROD;
 		add(goldText);
@@ -96,6 +98,44 @@ class ShopState extends FlxState
 	
 	private function loadSword():Void
 	{
+		//if (!Reg.loadedSave)
+		//{
+			//var i:Int;
+			//var gameSave:FlxSave = new FlxSave();
+			//gameSave.bind("bsbSave");
+//
+			//if (gameSave.data != null)
+			//{
+				//for (i in 1... gameSave.data.swordSize)
+				//{
+					//Reg.sword.levelUpSize();
+				//}
+				//for (i in 1... gameSave.data.swordSharpness)
+				//{
+					//Reg.sword.levelUpSharpness();
+				//}
+				//for (i in 1... gameSave.data.swordBalance)
+				//{
+					//Reg.sword.levelUpBalance();
+				//}
+			//
+				//for (i in 0...gameSave.data.runes.length)
+				//{
+					//var rune:Int = gameSave.data.runes[i];
+					//if (rune != 0)
+					//{
+						//Reg.sword.equipRune(i + 1, rune);
+					//}
+				//}
+				//
+				//Reg.gold = gameSave.data.gold;
+				//Reg.runeInventory.set(1, gameSave.data.fireCount);
+				//Reg.runeInventory.set(2, gameSave.data.darkCount);
+				//Reg.runeInventory.set(3, gameSave.data.lightningCount);
+				//Reg.furthestRun = gameSave.data.furthestRun;
+			//}
+			//Reg.loadedSave = true;
+		//}
 		sword = new SwordSprite();
 		var i:Int;
 		for (i in 1...Reg.sword.getSize())
@@ -113,10 +153,42 @@ class ShopState extends FlxState
 				
 		sword.x = 615;
 		sword.y = 450;
+		
+		var runes:Map<Int,Int> = Reg.sword.getRunes();
+		for (i in 0...Reg.sword.getSize())
+		{
+			var rune:Int = runes.get(i+1);
+			if (rune != 0)
+			{
+				sword.equipRune(i+1, rune);
+			}
+		}
 	}
 	
 	private function gotoPlayState():Void
 	{
+		//var gameSave:FlxSave = new FlxSave();
+		//gameSave.bind("bsbSave");
+		//gameSave.data.swordSize = sword.getSize();
+		//gameSave.data.swordSharpness = sword.getSharpness();
+		//gameSave.data.swordBalance = sword.getBalance();
+		//gameSave.data.runes = new Array<Int>();
+		//
+		//var runes:Map<Int, Int> =  sword.getRunes();
+		//var i:Int;
+		//var size:Int = sword.getSize() + 1;
+		//for (i in 1...size)
+		//{
+			//var rune:Int = runes.get(i);
+			//gameSave.data.runes.push(rune);
+		//}
+		//
+		//gameSave.data.gold = Reg.gold;
+		//gameSave.data.fireCount = Reg.runeInventory.get(1);
+		//gameSave.data.darkCount = Reg.runeInventory.get(2);
+		//gameSave.data.lightningCount = Reg.runeInventory.get(3);
+		//gameSave.flush(0);
+		
 		FlxG.camera.fade(FlxColor.BLACK,.33, false,function() {
 		FlxG.switchState(new PlayState());
 		});
@@ -125,6 +197,14 @@ class ShopState extends FlxState
 	private function cleanupWidgets():Void
 	{
 		for (widget in widgets)
+		{
+			remove(widget);
+		}
+	}
+	
+	private function cleanupSlotWidgets():Void
+	{
+		for (widget in slotWidgets)
 		{
 			remove(widget);
 		}
@@ -229,56 +309,218 @@ class ShopState extends FlxState
 		widgets.push(rank3);
 	}
 	
+	private var rune1Count:FlxText;
+	private var rune2Count:FlxText;
+	private var rune3Count:FlxText;
 	private function showRunes():Void
 	{
 		cleanupWidgets();
 
-		var rune1:FlxSprite = new FlxSprite(50, 200, "assets/images/runefire.png");
-		rune1.scale.x = 2;
-		rune1.scale.y = 2;
-		add(rune1);
+		var inv:Map<Int, Int> = Reg.runeInventory;
 		
-		var rune2:FlxSprite = new FlxSprite(150, 200, "assets/images/runedark.png");
-		rune2.scale.x = 2;
-		rune2.scale.y = 2;
-		add(rune2);
-		
-		var rune3:FlxSprite = new FlxSprite(250, 200, "assets/images/runelightning.png");
-		rune3.scale.x = 2;
-		rune3.scale.y = 2;
-		add(rune3);
+		var rune1:FlxSprite = null;
+		var rune2:FlxSprite = null;
+		var rune3:FlxSprite = null;
+		rune1Count = new FlxText(85, 210, 100, "x0", 10, true);
+		rune2Count = new FlxText(185, 210, 100, "x0", 10, true);
+		rune3Count = new FlxText(285, 210, 100, "x0", 10, true);
+		add(rune1Count);
+		widgets.push(rune1Count);
+		add(rune2Count);
+		widgets.push(rune2Count);
+		add(rune3Count);
+		widgets.push(rune3Count);
 
-		MouseEventManager.add(rune1, rune1MouseDown, null, null, null, false, true, false);
-		MouseEventManager.add(rune2, rune2MouseDown, null, null, null, false, true, false);
-		MouseEventManager.add(rune3, rune3MouseDown, null, null, null, false, true, false);
+			rune1 = new FlxSprite(50, 200, "assets/images/runefire.png");
+			rune1.scale.x = 2;
+			rune1.scale.y = 2;
+			add(rune1);
+
+			rune2 = new FlxSprite(150, 200, "assets/images/runedark.png");
+			rune2.scale.x = 2;
+			rune2.scale.y = 2;
+			add(rune2);
+	
+			rune3 = new FlxSprite(250, 200, "assets/images/runelightning.png");
+			rune3.scale.x = 2;
+			rune3.scale.y = 2;
+			add(rune3);
+	
+		if (rune1 != null)
+		{
+			MouseEventManager.add(rune1, rune1MouseDown, null, null, null, false, true, false);
+			widgets.push(rune1);
+		}
+		if (rune2 != null)
+		{
+			MouseEventManager.add(rune2, rune2MouseDown, null, null, null, false, true, false);
+			widgets.push(rune2);
+		}
+		if (rune3 != null)
+		{
+			MouseEventManager.add(rune3, rune3MouseDown, null, null, null, false, true, false);
+			widgets.push(rune3);
+		}
 		
-		widgets.push(rune1);
-		widgets.push(rune2);
-		widgets.push(rune3);
+		selector = new FlxSprite(0, 0, "assets/images/selector.png");
+		if (Reg.runeInventory.get(1) != null)
+		{
+			rune1Count.text = "x" + cast(Reg.runeInventory.get(1));
+		}
+		else
+		{
+			rune1Count.text = "x0";
+		}
+		if (Reg.runeInventory.get(2) != null)
+		{
+			rune2Count.text = "x" + cast(Reg.runeInventory.get(2));
+		}
+		else
+		{
+			rune2Count.text = "x0";
+		}
+		if (Reg.runeInventory.get(3) != null)
+		{
+			rune3Count.text = "x" + cast(Reg.runeInventory.get(3));
+		}
+		else
+		{
+			rune3Count.text = "x0";
+		}
+
+		remove(selector);
+		widgets.push(selector);
 	}
 	
 	private var selectedRune:Int;
-	
+	private var selector:FlxSprite;
 	private function rune1MouseDown(sprite:FlxSprite):Void
 	{
+		if (Reg.runeInventory.get(1) == null || Reg.runeInventory.get(1) <= 0)
+		{
+			return;
+		}
+		
+		if (selectedRune != 1)
+		{
 			selectedRune = 1;
+			selector.x = 35;
+			selector.y = 185;
+			add(selector);
+			showAvailableSlots();
+		}
+		else {
+			selectedRune = 0;
+			remove(selector);
+			cleanupSlotWidgets();
+		}
 	}
-	
+
 	private function rune2MouseDown(sprite:FlxSprite):Void
 	{
+		if (Reg.runeInventory.get(2) == null || Reg.runeInventory.get(2) <= 0)
+		{
+			return;
+		}
+		
+		if (selectedRune != 2)
+		{
 			selectedRune = 2;
+			selector.x = 135;
+			selector.y = 185;
+			add(selector);
+			showAvailableSlots();
+		}
+		else {
+			selectedRune = 0;
+			remove(selector);
+			cleanupSlotWidgets();
+		}
 	}
 	
 	private function rune3MouseDown(sprite:FlxSprite):Void
 	{
+		if (Reg.runeInventory.get(3) == null || Reg.runeInventory.get(3) <= 0)
+		{
+			return;
+		}
+		
+		if (selectedRune != 3)
+		{
 			selectedRune = 3;
+			selector.x = 235;
+			selector.y = 185;
+			add(selector);
+			showAvailableSlots();
+		}
+		else {
+			selectedRune = 0;
+			remove(selector);
+			cleanupSlotWidgets();
+		}
 	}
 	
 	private function equipRune(sprite:FlxSprite):Void
 	{
-		sword.equipRune(selectedRune);
-	}
+		var id = sprite.ID + 1;
+		if (selectedRune == 0 || id <= 0)
+		{
+			return;
+		}
+		
+		var returnRune:Int = sword.equipRune(id, selectedRune);
+		if (returnRune != 0)
+		{
+			Reg.runeInventory.set(returnRune, Reg.runeInventory.get(returnRune) + 1);	
+		}
+		
+		Reg.runeInventory.set(selectedRune, Reg.runeInventory.get(selectedRune) - 1);
 
+				if (Reg.runeInventory.get(1) != null)
+		{
+			rune1Count.text = "x" + cast(Reg.runeInventory.get(1));
+		}
+		else
+		{
+			rune1Count.text = "x0";
+		}
+		if (Reg.runeInventory.get(2) != null)
+		{
+			rune2Count.text = "x" + cast(Reg.runeInventory.get(2));
+		}
+		else
+		{
+			rune2Count.text = "x0";
+		}
+		if (Reg.runeInventory.get(3) != null)
+		{
+			rune3Count.text = "x" + cast(Reg.runeInventory.get(3));
+		}
+		else
+		{
+			rune3Count.text = "x0";
+		}
+		
+		selectedRune = 0;
+		remove(selector);
+		cleanupSlotWidgets();
+	}
+	
+	private function showAvailableSlots():Void
+	{
+		var size:Int = sword.getSize();
+		var i:Int;
+		for (i in 0...size)
+		{
+			var runeSelector:FlxSprite = new FlxSprite(640, 425 - i * 25, "assets/images/runeselector.png");
+			runeSelector.ID = i;
+			MouseEventManager.add(runeSelector, equipRune, null, null, null, false, true, false);
+			add(runeSelector);
+			widgets.push(runeSelector);
+			slotWidgets.push(runeSelector);
+		}
+	}
+	
 	private function upgradeSize():Void
 	{
 		var size:Int = sword.getSize();
@@ -342,12 +584,26 @@ class ShopState extends FlxState
 		upgradeCosts = new Array<Int>();
 		upgradeCosts.push(0); // Dummy data for lvl 0
 		upgradeCosts.push(25);
-		upgradeCosts.push(100);
-		upgradeCosts.push(500);
-		upgradeCosts.push(3000);
-		upgradeCosts.push(15000);
-		upgradeCosts.push(100000);
-		upgradeCosts.push(1000000);
+		upgradeCosts.push(150);
+		upgradeCosts.push(250);
+		upgradeCosts.push(400);
+		upgradeCosts.push(700);
+		upgradeCosts.push(1200);
+		upgradeCosts.push(1750);
+		upgradeCosts.push(2500);
+		upgradeCosts.push(4000);
+		upgradeCosts.push(6500);
+		upgradeCosts.push(9000);
+		upgradeCosts.push(14000);
+		upgradeCosts.push(20000);
+		upgradeCosts.push(35000);
+		upgradeCosts.push(50000);
+		upgradeCosts.push(68000);
+		upgradeCosts.push(90000);
+		upgradeCosts.push(110000);
+		upgradeCosts.push(130000);
+		upgradeCosts.push(200000);
+		upgradeCosts.push(500000);
 	}
 	
 	/**

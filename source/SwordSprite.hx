@@ -17,16 +17,16 @@ class SwordSprite extends FlxSpriteGroup
 	private var balance:Int = 1;
 	private var tip:FlxSprite;
 	private var slice:FlxSprite;
-	private var runeLevel:Int = 1;
-	private var map:Map<Int, Map<Int, Int>>;
+	private var runes:Map<Int, Int>;
+	private var spriteMap:Map<Int, FlxSprite>;
 	private var swordParts:Array<FlxSprite>;
 	
 	public function new(X:Float=0, Y:Float=0) 
 	{
 		super(X, Y, 0);
 		
-		map = new Map<Int, Map<Int,Int>>();
-		map.set(1, new Map<Int,Int>());
+		runes = new Map<Int, Int>();
+		spriteMap = new Map<Int, FlxSprite>();
 		swordParts = new Array<FlxSprite>();
 		
 		var hilt:FlxSprite = new FlxSprite(x, y, "assets/images/swordhilt.png");
@@ -71,7 +71,6 @@ class SwordSprite extends FlxSpriteGroup
 		tip.y -= 25;
 		slice.x += 33;
 		slice.scale.x++;
-		map.set(size, new Map<Int,Int>());
 	}
 	
 	public function levelUpSharpness():Void
@@ -84,36 +83,47 @@ class SwordSprite extends FlxSpriteGroup
 		balance++;
 	}
 	
-	public function equipRune(runeType:Int):Void
+	public function getRunes():Map<Int,Int>
 	{
-		if (runeLevel > size)
-		{
-			return;
-		}
-		
-		var rune:FlxSprite = null;
-		
-		switch(runeType)
-		{
-			case 1: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runefire.png");
-					
-			case 2: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runedark.png");
-					
-			case 3: rune = new FlxSprite(0, -25*runeLevel, "assets/images/runelightning.png");
-					
-		}
-		add(rune);
-		runeLevel++;	
+		return runes;
 	}
 	
 	// 1: Fire
 	// 2: Dark
 	// 3: Lightning
-	//public function equipRune(row:Int, col:Int, runeType:Int):Void
-	//{
-		//
-	//}
-	//
+	public function equipRune(row:Int, runeType:Int):Int
+	{		
+		// Remove old rune
+		var sprite:FlxSprite = spriteMap.get(row);
+		var returnID:Int = 0;
+		if (sprite != null)
+		{
+			returnID = sprite.ID;
+			remove(sprite);
+		}
+		
+		var rune:FlxSprite = null;
+		switch(runeType)
+		{
+			case 1: 
+				rune = new FlxSprite(25, -25*row, "assets/images/runefire.png");
+				rune.ID = 1;
+			case 2:
+				rune = new FlxSprite(25, -25*row, "assets/images/runedark.png");
+				rune.ID = 2;	
+			case 3:
+				rune = new FlxSprite(25, -25 * row, "assets/images/runelightning.png");
+				rune.ID = 3;
+		}
+		runes.set(row, runeType);
+		spriteMap.set(row, rune);
+		
+		swordParts.push(rune);
+		add(rune);
+		
+		return returnID;
+	}
+	
 	public function setAttack(attack:Bool):Void
 	{
 		if (attack)

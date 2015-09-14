@@ -37,7 +37,7 @@ class Reg
 	
 	public static var sword:SwordSprite;
 	
-	public static var gold:Int = 1000;
+	public static var gold:Int = 0;
 	
 	public static var heroX:Int = 100;
 	
@@ -50,4 +50,6 @@ class Reg
 	public static var runeInventory:Map<Int, Int> = new Map<Int, Int>();
 	
 	public static var furthestRun:Float = 0;
+	
+	public static var loadedSave:Bool = false;
 }
