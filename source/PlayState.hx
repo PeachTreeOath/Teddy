@@ -275,7 +275,7 @@ class PlayState extends FlxState
 		}
 		
 		distance += Reg.speed / 1000;
-		Reg.speed -= 0.1 + 0.005 * totalTime;
+		Reg.speed -= 0.1 + 0.0075 * totalTime;
 		backdropMtns.velocity.x = -Reg.speed * 5;
 		backdropHills.velocity.x = -Reg.speed * 10;
 		speedText.text = "SPEED: " + Std.int(Reg.speed);
