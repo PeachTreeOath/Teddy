@@ -37,6 +37,15 @@ class EnemySprite extends FlxSpriteGroup
 			case 3:
 				add(new FlxSprite(0, 0, "assets/images/lizardp.png"));
 				hp = 10;
+			case 4:
+				add(new FlxSprite(0, 0, "assets/images/lizardy.png"));
+				hp = 30;
+			case 5:
+				add(new FlxSprite(0, 0, "assets/images/lizardr.png"));
+				hp = 100;
+			case 6:
+				add(new FlxSprite(0, 0, "assets/images/lizardblack.png"));
+				hp = 500;
 		}
 		type = level;
 		
@@ -121,7 +130,13 @@ class EnemySprite extends FlxSpriteGroup
 			case 2:
 				return 4;
 			case 3:
-				return 10;
+				return 20;
+			case 4:
+				return 100;
+			case 5:
+				return 1000;
+			case 6:
+				return 100000;
 		}
 		
 		return -1;
