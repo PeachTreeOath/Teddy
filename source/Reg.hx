@@ -47,6 +47,8 @@ class Reg
 	
 	public static var speed:Float = 0;
 	
+	public static var playerDamage:Float = 0;
+	
 	public static var runeInventory:Map<Int, Int> = new Map<Int, Int>();
 	
 	public static var furthestRun:Float = 0;

@@ -598,12 +598,18 @@ class ShopState extends FlxState
 		upgradeCosts.push(20000);
 		upgradeCosts.push(35000);
 		upgradeCosts.push(50000);
-		upgradeCosts.push(68000);
-		upgradeCosts.push(90000);
-		upgradeCosts.push(110000);
-		upgradeCosts.push(130000);
-		upgradeCosts.push(200000);
-		upgradeCosts.push(500000);
+
+
+		
+		var lastCost:Int = 50000;
+		var newCost:Int;
+		for (i in 1...500) {
+			newCost = cast(lastCost * 1.25);
+			upgradeCosts.push(newCost);
+			lastCost = newCost;
+		}
+		
+		
 	}
 	
 	/**

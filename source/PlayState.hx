@@ -45,6 +45,7 @@ class PlayState extends FlxState
 	private var speedRewardText:FlxText;
 	private var runeRewardText:FlxText;
 	private var distanceText:FlxText;
+	private var damageText:FlxText;
 	
 	private var spell1:FlxButton;
 	private var spell2:FlxButton;
@@ -110,6 +111,10 @@ class PlayState extends FlxState
 		distanceText = new FlxText(30, 80, 200, "DISTANCE: " + Std.int(distance), 12, true);
 		distanceText.color = FlxColor.BLACK;
 		add(distanceText);
+		
+		damageText = new FlxText(30, 110, 200, "PLAYER DAMAGE: " + Std.int(Reg.playerDamage), 12, true);
+		damageText.color = FlxColor.RED;
+		add(damageText);
 		
 		goldRewardText = new FlxText(105, 505, 200, null, 12, true);
 		goldRewardText.color = FlxColor.GOLDENROD;
@@ -223,7 +228,26 @@ class PlayState extends FlxState
 			playDeathAnim();
 			return;
 		}
-
+		
+		//Slow player down based on how many enemies are attacking
+		
+		var enemyCount:Int = 0;
+		
+		for (row in 0...5)
+		{
+			var enemySprites:Array<EnemySprite> = enemyLanes.get(row);
+			for (enemySprite in enemySprites) {
+				if (enemySprite != null) {
+					enemyCount++;
+				}
+			}	
+		}
+		
+		if (enemyCount > 20){
+			Reg.playerDamage += (enemyCount * .2)  ;
+		}
+		
+		
 		totalTime += FlxG.elapsed;
 		
 		if (totalTime >= nextAttackTime)
@@ -275,12 +299,14 @@ class PlayState extends FlxState
 		}
 		
 		distance += Reg.speed / 1000;
-		Reg.speed -= 0.1 + 0.0075 * totalTime;
+		Reg.speed -= 0.1 + 0.0075 * (totalTime + Reg.playerDamage);
 		backdropMtns.velocity.x = -Reg.speed * 5;
 		backdropHills.velocity.x = -Reg.speed * 10;
 		speedText.text = "SPEED: " + Std.int(Reg.speed);
 
 		distanceText.text = "DISTANCE: " + Std.int(distance);
+		
+		damageText.text = "DAMAGE TAKEN: " + Std.int(Reg.playerDamage);
 	}	
 	
 	private var dead:Bool = false;
@@ -290,6 +316,7 @@ class PlayState extends FlxState
 		backdropHills.velocity.x = 0;
 		dead = true;
 		Reg.speed = 0;
+		Reg.playerDamage = 0;
 		sword.forceReadySword();
 		sword.flicker();
 		
@@ -345,7 +372,7 @@ class PlayState extends FlxState
 			var delay:Float = 0;
 			for (enemy in enemyLanes.get(highestRow))
 			{
-				enemy.takeDamage(10);
+				enemy.takeDamage(30);
 			}
 			fireSprite.y = topRowHeight + rowOffset * highestRow;
 			playFireAnim(null);
@@ -395,7 +422,7 @@ class PlayState extends FlxState
 			var enemy:EnemySprite = getEnemyAt(row, col);
 			if (enemy != null)
 			{
-				enemy.takeDamage(10);
+				enemy.takeDamage(25);
 			}
 		}
 		
@@ -492,7 +519,17 @@ class PlayState extends FlxState
 	{
 		// Pick lane
 		var row:Int = FlxRandom.intRanged(0, 4);
-		var type:Int = FlxRandom.intRanged(1, 3);
+		var type:Int;
+		if (distance > 100000) { 
+			type = FlxRandom.intRanged(4, 6);
+		} else if (distance > 10000) { 
+			type = FlxRandom.intRanged(3, 5);
+		} else if (distance > 1000) {
+			type = FlxRandom.intRanged(2, 4);
+		} else {
+			type = FlxRandom.intRanged(1, 3);
+		}
+		
 		var enemy:EnemySprite = new EnemySprite(1000, topRowHeight + rowOffset * row, type);
 		enemy.setRow(row);
 		enemy.setCol(enemyLanes.get(row).length);
